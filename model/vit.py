@@ -39,19 +39,24 @@ class EncoderLayer(nn.Module):
     def __init__(self, dim, heads, mlp_dim, dropout=0.):
         super().__init__()
         self.norm1 = nn.LayerNorm(dim)
-        self.attn = nn.MultiheadAttention(dim, heads)
+        self.attn = nn.MultiheadAttention(dim, heads, dropout=dropout, batch_first=True)
         self.norm2 = nn.LayerNorm(dim)
         self.mlp = nn.Sequential(
             nn.Linear(dim, mlp_dim),
             nn.GELU(),
+            nn.Dropout(dropout),
             nn.Linear(mlp_dim, dim),
+            nn.Dropout(dropout)
         )
     
     def forward(self, x):
+        # Self-attention
         z = self.norm1(x)
-        z = self.attn(z)
+        z, _ = self.attn(z, z, z)  
         # Residual connection
         x = x + z   
+        
+        # MLP
         z = self.norm2(x)
         z = self.mlp(z)
         # Residual connection
@@ -76,7 +81,7 @@ class ViT(nn.Module):
         self.patch_embedding = PatchEmbedding(self.patch_dim, dim)
         
         # Position embeddings
-        self.pos_embedding = AddPositionEmbedding(dim)
+        self.add_position_embedding = AddPositionEmbedding(dim)
         
         # Class token
         self.cls_token = nn.Parameter(torch.randn(1, 1, dim))
@@ -97,17 +102,18 @@ class ViT(nn.Module):
         # Project to embedding dimension
         x = self.patch_embedding(x)
         
-        # Add class token
+        # Add learnable class token
         cls_tokens = self.cls_token.expand(x.shape[0], -1, -1)
         x = torch.cat((cls_tokens, x), dim=1)
         
         # Add position embeddings
-        x = x + self.pos_embedding
+        x = self.add_position_embedding(x)
         
-        # Apply transformer
-        x = self.transformer(x)
+        # Apply encoder layers sequentially
+        for layer in self.encoder_layers:
+            x = layer(x)
         
-        # Use class token for classification
+        # Use only class token for classification
         x = x[:, 0]
         
         # Classification head
