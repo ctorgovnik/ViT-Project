@@ -15,12 +15,12 @@ class BaseTrainer:
     def train(self, train_loader, val_loader, num_epochs):
         for epoch in range(num_epochs):
             train_loss, train_acc = self._train_epoch(train_loader)
-            val_loss, val_acc = self.validate(val_loader)
+            val_loss, val_acc = self._validate(val_loader)
             print(f"Epoch {epoch} - Train loss: {train_loss}, Train accuracy: {train_acc}")
             if val_acc > self.best_val_acc:
                 self.best_val_loss = val_loss
                 self.best_val_acc = val_acc
-                self.save_checkpoint(epoch, train_loss, train_acc, val_loss, val_acc)
+                self._save_checkpoint(epoch, train_loss, train_acc, val_loss, val_acc)
                 print(f"Saved checkpoint for epoch {epoch} with validation accuracy: {val_acc}, val loss: {val_loss}")   
             else:
                 print(f"Epoch {epoch} - Validation accuracy: {val_acc}, val loss: {val_loss}")
@@ -47,7 +47,7 @@ class BaseTrainer:
         train_acc = 100. * correct / total
         return train_loss, train_acc
     
-    def validate(self, val_loader):
+    def _validate(self, val_loader):
         self.model.eval()
         val_loss = 0
         correct = 0
@@ -67,7 +67,7 @@ class BaseTrainer:
         val_acc = 100. * correct / total
         return val_loss, val_acc
                 
-    def save_checkpoint(self, epoch, train_loss, train_acc, val_loss, val_acc):
+    def _save_checkpoint(self, epoch, train_loss, train_acc, val_loss, val_acc):
         checkpoint_path = os.path.join(self.output_dir, f"checkpoint_epoch_{epoch}.pth")
         torch.save({
             "epoch": epoch,
