@@ -4,6 +4,41 @@ import pickle
 from torch.utils.data import DataLoader
 from .dataset import ImageDataset
 
+
+def get_cifar10_dataloaders(config, shuffle=True):
+    """Load either CIFAR-10 or ImageNet dataset."""
+
+    data = load_cifar10_batches(os.path.join(config.data_dir, "cifar10"))
+    
+    # Reshape data to (N, H, W, C)
+    train_data = data['train_data'].reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
+    test_data = data['test_data'].reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
+    
+    train_dataset = ImageDataset(train_data, data['train_labels'], is_cifar10=True)
+    test_dataset = ImageDataset(test_data, data['test_labels'], is_cifar10=True)
+    
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=config.train.batch_size,
+        shuffle=shuffle,
+        num_workers=4,
+        pin_memory=True
+    )
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=config.train.batch_size,
+        shuffle=shuffle,
+        num_workers=4,
+        pin_memory=True
+    )
+    return train_loader, test_loader
+
+def get_cifar100_dataloaders(config):
+    pass
+
+def get_imagenet_dataloaders(config):
+    pass
+
 def load_cifar10_batches(data_dir):
     """Load and combine all CIFAR-10 batches."""
     # Load training batches
@@ -45,63 +80,7 @@ def load_cifar10_batches(data_dir):
         'label_names': label_names
     }
 
-def load_data(batch_size, shuffle=True, mode="train", data_dir="data", dataset="cifar10"):
-    """Load either CIFAR-10 or ImageNet dataset."""
-    if dataset.lower() == "cifar10":
-        # CIFAR-10
-        data = load_cifar10_batches(os.path.join(data_dir, "cifar10"))
-       
-        # Reshape data to (N, H, W, C)
-        train_data = data['train_data'].reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
-        test_data = data['test_data'].reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
-        
-        train_dataset = ImageDataset(train_data, data['train_labels'], is_cifar10=True)
-        test_dataset = ImageDataset(test_data, data['test_labels'], is_cifar10=True)
-        
-        if mode == "train":
-            train_loader = DataLoader(
-                train_dataset,
-                batch_size=batch_size,
-                shuffle=shuffle,
-                num_workers=4,
-                pin_memory=True
-            )
-            test_loader = DataLoader(
-                test_dataset,
-                batch_size=batch_size,
-                shuffle=shuffle,
-                num_workers=4,
-                pin_memory=True
-            )
-            return train_loader, test_loader
-        else:
-            test_loader = DataLoader(
-                test_dataset,
-                batch_size=batch_size,
-                shuffle=shuffle,
-                num_workers=4,
-                pin_memory=True
-            )
-            return test_loader
-    else:
-        # ImageNet
-        image_paths = gather_image_paths(data_dir, mode)
-
-        if mode == "train":
-            train_dataset = ImageDataset(image_paths['train'])
-            val_dataset = ImageDataset(image_paths['val'])
-
-            train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=4)
-            val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=4)
-
-            return train_loader, val_loader
-        
-        elif mode == "test":
-            test_dataset = ImageDataset(image_paths['test'])
-            test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=4)
-            return test_loader
-
-
+# use for imagenet and cifar100
 def gather_image_paths(data_dir, mode):
     image_paths = {}
     if mode == "train":

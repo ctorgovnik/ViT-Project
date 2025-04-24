@@ -1,29 +1,45 @@
 import argparse
 
+from pydantic import BaseModel
 
-class Config:
+class ModelConfig(BaseModel):
+    patch_size:   int = 16
+    image_size:   int = 224
+    embed_dim:    int = 768
+    depth:        int = 12
+    mlp_dim:      int = 3072
+    num_heads:    int = 12
+    num_classes:  int = 1000
+    dropout:      float = 0.1
 
-    def __init__(self, args):
-        params = self._parse_args(args)
-        self.batch_size = params.batch_size
-        self.shuffle = params.shuffle
-        self.mode = params.mode
-        self.data_dir = params.data_dir
-        self.dataset = params.dataset
-        self.patch_size = params.patch_size
-        self.dim = params.dim
-        self.depth = params.depth
-        self.heads = params.heads
-        self.mlp_dim = params.mlp_dim
-        self.dropout = params.dropout
-        self.learning_rate = params.learning_rate
-        self.epochs = params.epochs
+class OptimConfig(BaseModel):
+    name:     str   = "AdamW"
+    lr:       float = 1e-3
+    weight_decay: float = 0.1
+
+class TrainConfig(BaseModel):
+    epochs:     int = 100
+    batch_size: int = 4096
+    shuffle:    bool = True
+class Config(BaseModel):
+    model: ModelConfig
+    optim: OptimConfig
+    train: TrainConfig
+    device: str = "cpu"
+    checkpoint: str = "./results/checkpoint.pth"
+    data_dir: str = "./data"
+    mode: str = "pretrain"
+
+    @classmethod
+    def from_args(cls, args):
+        params = cls._parse_args(args)
+        return cls(**params)
 
     def _parse_args(self, args):
         parser = argparse.ArgumentParser()
         parser.add_argument('-b', "--batch_size", type=int, default=32)
         parser.add_argument('-s', "--shuffle", type=bool, default=True)
-        parser.add_argument('-m', "--mode", type=str, default="train")
+        parser.add_argument('-m', "--mode", type=str, default="pretrain")
         parser.add_argument('-dir', "--data_dir", type=str, default="data")
         parser.add_argument('-ds', "--dataset", type=str, default="cifar10")
         parser.add_argument('-ps', "--patch_size", type=int, default=16)
@@ -34,5 +50,9 @@ class Config:
         parser.add_argument('-do', "--dropout", type=float, default=0.1)
         parser.add_argument('-lr', "--learning_rate", type=float, default=0.001)
         parser.add_argument('-e', "--epochs", type=int, default=10)
-        
+        parser.add_argument('-od', "--output_dir", type=str, default="results")
+
         return parser.parse_args()
+
+
+    

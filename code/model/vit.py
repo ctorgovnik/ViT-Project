@@ -95,6 +95,13 @@ class ViT(nn.Module):
             nn.Linear(dim, num_classes)
         )
     
+    def reset_classification_head(self, num_classes):
+        """Reset the classification head for finetuning."""
+        self.mlp_head = nn.Sequential(
+            nn.LayerNorm(self.dim),
+            nn.Linear(self.dim, num_classes)
+        )
+    
     def forward(self, x):
         # Split into patches
         x = self.patch_splitter(x)
