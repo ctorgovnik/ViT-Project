@@ -3,19 +3,22 @@ import torch
 
 class BaseTrainer:
 
-    def __init__(self, model, optimizer, criterion, device, output_dir):
+    def __init__(self, model, optimizer, criterion, device, output_dir, train_loader, val_loader, num_epochs):
         self.model = model
         self.optimizer = optimizer
         self.criterion = criterion
         self.device = device
         self.output_dir = output_dir
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+        self.num_epochs = num_epochs
         self.best_val_loss = float('inf')
         self.best_val_acc = 0
-
-    def train(self, train_loader, val_loader, num_epochs):
-        for epoch in range(num_epochs):
-            train_loss, train_acc = self._train_epoch(train_loader)
-            val_loss, val_acc = self._validate(val_loader)
+    
+    def train(self):
+        for epoch in range(self.num_epochs):
+            train_loss, train_acc = self._train_epoch()
+            val_loss, val_acc = self._validate()
             print(f"Epoch {epoch} - Train loss: {train_loss}, Train accuracy: {train_acc}")
             if val_acc > self.best_val_acc:
                 self.best_val_loss = val_loss
@@ -25,13 +28,13 @@ class BaseTrainer:
             else:
                 print(f"Epoch {epoch} - Validation accuracy: {val_acc}, val loss: {val_loss}")
     
-    def _train_epoch(self, train_loader):
+    def _train_epoch(self):
         self.model.train()
         train_loss = 0
         correct = 0
         total = 0
 
-        for batch_idx, (inputs, targets) in enumerate(train_loader):
+        for batch_idx, (inputs, targets) in enumerate(self.train_loader):
             inputs, targets = inputs.to(self.device), targets.to(self.device)
             self.optimizer.zero_grad()
             outputs = self.model(inputs)
@@ -43,18 +46,18 @@ class BaseTrainer:
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-        train_loss = train_loss / len(train_loader)
+        train_loss = train_loss / len(self.train_loader)
         train_acc = 100. * correct / total
         return train_loss, train_acc
     
-    def _validate(self, val_loader):
+    def _validate(self):
         self.model.eval()
         val_loss = 0
         correct = 0
         total = 0
         
         with torch.no_grad():
-            for batch_idx, (inputs, targets) in enumerate(val_loader):
+            for batch_idx, (inputs, targets) in enumerate(self.val_loader):
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, targets)
@@ -63,7 +66,7 @@ class BaseTrainer:
                 total += targets.size(0)
                 correct += predicted.eq(targets).sum().item()
                 
-        val_loss = val_loss / len(val_loader)
+        val_loss = val_loss / len(self.val_loader)
         val_acc = 100. * correct / total
         return val_loss, val_acc
                 
@@ -82,5 +85,5 @@ class BaseTrainer:
                 "val": val_acc
             }
         }, checkpoint_path)
-        
+    
         

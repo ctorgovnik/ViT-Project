@@ -10,6 +10,7 @@ def get_cifar10_dataloaders(config, shuffle=True):
 
     data = load_cifar10_batches(os.path.join(config.data_dir, "cifar10"))
     
+    
     # Reshape data to (N, H, W, C)
     train_data = data['train_data'].reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
     test_data = data['test_data'].reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
@@ -33,10 +34,10 @@ def get_cifar10_dataloaders(config, shuffle=True):
     )
     return train_loader, test_loader
 
-def get_cifar100_dataloaders(config):
+def get_cifar100_dataloaders(config, shuffle=True):
     pass
 
-def get_imagenet_dataloaders(config):
+def get_imagenet_dataloaders(config, shuffle=True):
     pass
 
 def load_cifar10_batches(data_dir):

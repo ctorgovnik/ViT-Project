@@ -1,21 +1,25 @@
 import sys
-from config import Config
-from model.vit import ViT
-from train import train
+from code.model.vit import ViT
 import torch
-from train.finetuner import Finetuner
-from train.pretrainer import Pretrainer
+from code.train.finetuner import FineTuner
+from code.train.pretrainer import PreTrainer
+from code.config import Config
+
+"""
+sample command:
+python -m code.main -m pretrain -b 128 -e 100
+"""
 
 def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f'Using device: {device}\n')
     
-    config = Config(args)
+    config = Config.parse_args(args)
     
     if config.mode == "finetune":
-        trainer = Finetuner.from_config(config)
+        trainer = FineTuner.from_config(config)
     else:
-        trainer = Pretrainer.from_config(config)
+        trainer = PreTrainer.from_config(config)
     
     trainer.train()
 
