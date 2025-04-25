@@ -7,7 +7,8 @@ from code.config import Config
 
 """
 sample command:
-python -m code.main -m pretrain -b 128 -e 100
+Pretrain on CIFAR10:
+python -m code.main -m pretrain -b 128 -e 100 -i 32
 """
 
 def main(args):

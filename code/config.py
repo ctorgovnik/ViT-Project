@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class ModelConfig(BaseModel):
     patch_size:   int = 16
-    image_size:   int = 224
+    image_size:   int = 32 # 32x32 image for cifar10, 224x224 image for imagenet
     dim:          int = 768
     depth:        int = 12
     mlp_dim:      int = 3072
@@ -57,7 +57,7 @@ class Config(BaseModel):
         parser.add_argument('--lr', type=float, default=1e-3)
         parser.add_argument('--weight_decay', type=float, default=0.1)
         parser.add_argument('--criterion', type=str, default="CrossEntropyLoss")
-
+        parser.add_argument('-i', '--image_size', type=int, default=32)
         args = parser.parse_args(args)
         
         criterion_class = getattr(torch.nn, args.criterion)
@@ -66,7 +66,7 @@ class Config(BaseModel):
         return cls(
             model=ModelConfig(
                 patch_size=args.patch_size,
-                image_size=224,
+                image_size=args.image_size,
                 dim=args.dim,
                 depth=args.depth,
                 mlp_dim=args.mlp_dim,

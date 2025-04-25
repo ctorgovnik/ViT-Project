@@ -27,11 +27,12 @@ class PatchEmbedding(nn.Module):
         return self.linear(x)
 
 class AddPositionEmbedding(nn.Module):
-    def __init__(self, embed_dim):
+    def __init__(self, num_tokens, embed_dim):
         super().__init__()
-        self.pos_embedding = nn.Parameter(torch.randn(1, 1, embed_dim))
+        self.pos_embedding = nn.Parameter(torch.randn(1, num_tokens, embed_dim))
     
     def forward(self, x):
+        
         return x + self.pos_embedding
     
 
@@ -71,7 +72,7 @@ class ViT(nn.Module):
         self.image_size = image_size
         self.patch_size = patch_size
         self.num_classes = num_classes
-        
+
         # Calculate dimensions
         self.num_patches = (image_size // patch_size) ** 2
         self.patch_dim = 3 * patch_size * patch_size  # 3 for RGB channels
@@ -79,12 +80,12 @@ class ViT(nn.Module):
         # Patch processing modules
         self.patch_splitter = PatchSplitter(patch_size)
         self.patch_embedding = PatchEmbedding(self.patch_dim, dim)
-        
+
         # Position embeddings
-        self.add_position_embedding = AddPositionEmbedding(dim)
+        self.add_position_embedding = AddPositionEmbedding(self.num_patches + 1, dim) # +1 for the class token
         
         # Class token
-        self.cls_token = nn.Parameter(torch.randn(1, 1, dim))
+        self.cls_token = nn.Parameter(torch.randn(1, 1, dim)) # same class token for all images
         
         # Transformer layers
         self.encoder_layers = nn.ModuleList([EncoderLayer(dim, heads, mlp_dim, dropout) for _ in range(depth)])
