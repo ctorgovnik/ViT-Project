@@ -24,9 +24,9 @@ class BaseTrainer:
                 self.best_val_loss = val_loss
                 self.best_val_acc = val_acc
                 self._save_checkpoint(epoch, train_loss, train_acc, val_loss, val_acc)
-                print(f"Saved checkpoint for epoch {epoch} with validation accuracy: {val_acc}, val loss: {val_loss}")   
+                print(f"Saved checkpoint for epoch {epoch} with validation loss: {val_loss}, validation accuracy: {val_acc}")   
             else:
-                print(f"Epoch {epoch} - Validation accuracy: {val_acc}, val loss: {val_loss}")
+                print(f"Epoch {epoch} - Validation loss: {val_loss}, Validation accuracy: {val_acc}")
     
     def _train_epoch(self):
         self.model.train()
