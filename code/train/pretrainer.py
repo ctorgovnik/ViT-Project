@@ -7,7 +7,7 @@ class PreTrainer(BaseTrainer):
     @classmethod
     def from_config(cls, config):
         from code.model.vit import ViT
-        from code.utils.data_loader import get_imagenet_dataloaders
+        from code.utils.data_loader import get_imagenet100_dataloaders
         
         model = ViT(**config.model.model_dump())
 
@@ -22,6 +22,6 @@ class PreTrainer(BaseTrainer):
         criterion = config.criterion
         device = config.device
         output_dir = config.output_dir
-        train_loader, val_loader = get_imagenet_dataloaders(config, imagenet_path=config.data_dir, shuffle=config.train.shuffle)
+        train_loader, val_loader = get_imagenet100_dataloaders(config, imagenet_path=config.data_dir, shuffle=config.train.shuffle)
 
         return cls(model, optimizer, criterion, device, output_dir, train_loader, val_loader, config.train.epochs)

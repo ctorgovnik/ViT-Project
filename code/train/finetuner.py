@@ -14,7 +14,7 @@ class FineTuner(BaseTrainer):
         model.load_state_dict(checkpoint)
 
         # replace head
-        model.reset_classification_head(num_classes=10) # change to 100 when using cifar100
+        model.reset_classification_head(num_classes=config.model.num_classes)
 
         # create optimizer
         optimizer_class = getattr(torch.optim, config.optimizer.name)

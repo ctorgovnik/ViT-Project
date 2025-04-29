@@ -58,6 +58,8 @@ class Config(BaseModel):
         parser.add_argument('--weight_decay', type=float, default=0.1)
         parser.add_argument('--criterion', type=str, default="CrossEntropyLoss")
         parser.add_argument('-i', '--image_size', type=int, default=32)
+        parser.add_argument('-nc', "--num_classes", type=int, default=10)
+
         args = parser.parse_args(args)
         
         criterion_class = getattr(torch.nn, args.criterion)
@@ -71,7 +73,7 @@ class Config(BaseModel):
                 depth=args.depth,
                 mlp_dim=args.mlp_dim,
                 heads=args.heads,
-                num_classes=10,
+                num_classes=args.num_classes,
                 dropout=args.dropout
             ),
             train=TrainConfig(

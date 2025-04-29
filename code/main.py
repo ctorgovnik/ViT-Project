@@ -7,8 +7,14 @@ from code.config import Config
 
 """
 sample command:
-Pretrain on CIFAR10:
-python -m code.main -m pretrain -b 128 -e 100 -i 32
+Pretrain on Imagenet100:
+python -m code.main -m pretrain -b 128 -e 100 -i 224 -nc 100 -dir data/imagenet-100
+
+Pretrain on ImageNet-1000:
+python -m code.main -m pretrain -b 128 -e 100 -i 224 -nc 1000 -dir data/ImageNet-2012
+
+Finetune on CIFAR10:
+python -m code.main -m finetune -b 128 -e 100 -i 32 -nc 10 -dir data/cifar10
 """
 
 def main(args):

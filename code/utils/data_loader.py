@@ -5,6 +5,8 @@ from torch.utils.data import DataLoader
 from .dataset import ImageDataset
 from torchvision.datasets import ImageNet
 from torchvision import transforms
+from torchvision.datasets import ImageFolder
+
 def get_imagenet_dataloaders(config, imagenet_path = "data/imagenet", shuffle=True):
     
     normalize = transforms.Normalize(
@@ -28,6 +30,46 @@ def get_imagenet_dataloaders(config, imagenet_path = "data/imagenet", shuffle=Tr
 
     train_ds = ImageNet(root=imagenet_path, split="train", transform=train_tf)
     val_ds   = ImageNet(root=imagenet_path, split="val",   transform=val_tf)
+
+    train_loader = DataLoader(
+        train_ds,
+        batch_size=128,
+        shuffle=True,
+        num_workers=8,
+        pin_memory=True,
+    )
+    val_loader = DataLoader(
+        val_ds,
+        batch_size=128,
+        shuffle=False,
+        num_workers=8,
+        pin_memory=True,
+    )
+
+    return train_loader, val_loader
+
+def get_imagenet100_dataloaders(config, imagenet_path = "data/imagenet100", shuffle=True):
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std =[0.229, 0.224, 0.225],
+    )
+
+    train_tf = transforms.Compose([
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        normalize,
+    ])
+
+    val_tf = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        normalize,
+    ])
+
+    train_ds = ImageFolder(root=os.path.join(imagenet_path, "train"), transform=train_tf)
+    val_ds   = ImageFolder(root=os.path.join(imagenet_path, "val"),   transform=val_tf)
 
     train_loader = DataLoader(
         train_ds,
@@ -78,8 +120,6 @@ def get_cifar10_dataloaders(config, shuffle=True):
 def get_cifar100_dataloaders(config, shuffle=True):
     pass
 
-def get_imagenet_dataloaders(config, shuffle=True):
-    pass
 
 def load_cifar10_batches(data_dir):
     """Load and combine all CIFAR-10 batches."""
