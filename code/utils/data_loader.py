@@ -7,7 +7,7 @@ from torchvision.datasets import ImageNet
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
-def get_imagenet_dataloaders(config, imagenet_path = "data/imagenet", shuffle=True):
+def get_imagenet1000_dataloaders(config, imagenet_path = "data/ImageNet-2012", shuffle=True):
     
     normalize = transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
@@ -33,14 +33,14 @@ def get_imagenet_dataloaders(config, imagenet_path = "data/imagenet", shuffle=Tr
 
     train_loader = DataLoader(
         train_ds,
-        batch_size=128,
+        batch_size=config.train.batch_size,
         shuffle=True,
         num_workers=8,
         pin_memory=True,
     )
     val_loader = DataLoader(
         val_ds,
-        batch_size=128,
+        batch_size=config.train.batch_size,
         shuffle=False,
         num_workers=8,
         pin_memory=True,
@@ -73,14 +73,14 @@ def get_imagenet100_dataloaders(config, imagenet_path = "data/imagenet100", shuf
 
     train_loader = DataLoader(
         train_ds,
-        batch_size=128,
+        batch_size=config.train.batch_size,
         shuffle=True,
         num_workers=8,
         pin_memory=True,
     )
     val_loader = DataLoader(
         val_ds,
-        batch_size=128,
+        batch_size=config.train.batch_size,
         shuffle=False,
         num_workers=8,
         pin_memory=True,
@@ -91,7 +91,7 @@ def get_imagenet100_dataloaders(config, imagenet_path = "data/imagenet100", shuf
 def get_cifar10_dataloaders(config, shuffle=True):
     """Load either CIFAR-10 or ImageNet dataset."""
 
-    data = load_cifar10_batches(os.path.join(config.data_dir, "cifar10"))
+    data = load_cifar10_batches(config.data_dir)
     
     
     # Reshape data to (N, H, W, C)

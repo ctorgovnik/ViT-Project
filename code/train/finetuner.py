@@ -6,7 +6,7 @@ class FineTuner(BaseTrainer):
     @classmethod
     def from_config(cls, config):
         from code.model.vit import ViT
-        from code.utils.data_loader import get_cifar10_dataloaders
+        from code.utils.data_loader import get_cifar10_dataloaders, get_cifar100_dataloaders
 
         # load pretrained weights
         model = ViT(**config.model.model_dump())
@@ -27,6 +27,11 @@ class FineTuner(BaseTrainer):
         criterion = config.criterion
         device = config.device
         output_dir = config.output_dir
-        train_loader, val_loader = get_cifar10_dataloaders(config, config.train.shuffle)
+        if config.data_dir == "data/cifar10":
+            train_loader, val_loader = get_cifar10_dataloaders(config, config.train.shuffle)
+        elif config.data_dir == "data/cifar100":
+            train_loader, val_loader = get_cifar100_dataloaders(config, config.train.shuffle)
+        else:
+            raise ValueError(f"Invalid dataset: {config.data_dir}")
 
         return cls(model, optimizer, criterion, device, output_dir, train_loader, val_loader, config.train.epochs)
