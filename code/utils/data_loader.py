@@ -3,7 +3,48 @@ import numpy as np
 import pickle
 from torch.utils.data import DataLoader
 from .dataset import ImageDataset
+from torchvision.datasets import ImageNet
+from torchvision import transforms
+def get_imagenet_dataloaders(config, imagenet_path = "data/imagenet", shuffle=True):
+    
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std =[0.229, 0.224, 0.225],
+    )
 
+    train_tf = transforms.Compose([
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        normalize,
+    ])
+
+    val_tf = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        normalize,
+    ])
+
+    train_ds = ImageNet(root=imagenet_path, split="train", transform=train_tf)
+    val_ds   = ImageNet(root=imagenet_path, split="val",   transform=val_tf)
+
+    train_loader = DataLoader(
+        train_ds,
+        batch_size=128,
+        shuffle=True,
+        num_workers=8,
+        pin_memory=True,
+    )
+    val_loader = DataLoader(
+        val_ds,
+        batch_size=128,
+        shuffle=False,
+        num_workers=8,
+        pin_memory=True,
+    )
+
+    return train_loader, val_loader
 
 def get_cifar10_dataloaders(config, shuffle=True):
     """Load either CIFAR-10 or ImageNet dataset."""
