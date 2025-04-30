@@ -6,6 +6,8 @@ from .dataset import ImageDataset
 from torchvision.datasets import ImageNet
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
+from torchvision.datasets import CIFAR100
+from torchvision import transforms
 
 def get_imagenet1000_dataloaders(config, imagenet_path = "data/ImageNet-2012", shuffle=True):
     
@@ -117,8 +119,56 @@ def get_cifar10_dataloaders(config, shuffle=True):
     )
     return train_loader, test_loader
 
-def get_cifar100_dataloaders(config, shuffle=True):
-    pass
+def get_cifar100_dataloaders(config, data_dir="data/cifar100", shuffle=True):
+    normalize = transforms.Normalize(
+        mean=[0.507, 0.486, 0.401],
+        std=[0.267, 0.256, 0.276],
+    )
+
+    train_tf = transforms.Compose([
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomCrop(32, padding=4),
+        transforms.ToTensor(),
+        normalize,
+    ])
+
+    val_tf = transforms.Compose([
+        transforms.ToTensor(),
+        normalize,
+    ])
+    
+    train_ds = CIFAR100(
+        root=data_dir,           # where to put / look for the files
+        train=True,
+        download=True,           # <— tell it to fetch if missing
+        transform=transforms.ToTensor()
+    )
+
+    val_ds = CIFAR100(
+        root=data_dir,
+        train=False,
+        download=True,
+        transform=transforms.ToTensor()
+    )
+
+    train_loader = DataLoader(
+        train_ds,
+        batch_size=config.train.batch_size,
+        shuffle=shuffle,
+        num_workers=4,
+        pin_memory=True
+    )
+
+    val_loader = DataLoader(
+        val_ds,
+        batch_size=config.train.batch_size,
+        shuffle=shuffle,
+        num_workers=4,
+        pin_memory=True
+    )
+
+    return train_loader, val_loader
+    
 
 
 def load_cifar10_batches(data_dir):
