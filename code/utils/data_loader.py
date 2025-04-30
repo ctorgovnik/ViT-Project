@@ -156,33 +156,27 @@ def get_cifar100_dataloaders(config, data_dir="data/cifar100", shuffle=True):
     )
 
     train_tf = transforms.Compose([
-        # Basic augmentations
+        # Essential augmentations
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomVerticalFlip(p=0.2),
         
-        # Color augmentations
-        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
-        transforms.RandomAutocontrast(p=0.5),
-        transforms.RandomEqualize(p=0.5),
-        transforms.RandomAdjustSharpness(sharpness_factor=2, p=0.5),
+        # Moderate color augmentations
+        transforms.ColorJitter(
+            brightness=0.2,  # Reduced from 0.4
+            contrast=0.2,    # Reduced from 0.4
+            saturation=0.2,  # Reduced from 0.4
+            hue=0.1
+        ),
         
-        # Geometric augmentations
-        transforms.RandomRotation(15),
-        transforms.RandomAffine(0, translate=(0.1, 0.1)),
-        transforms.RandomPerspective(distortion_scale=0.2),
-        
-        # Advanced augmentations
-        transforms.RandomSolarize(threshold=192.0, p=0.2),
-        transforms.RandomPosterize(bits=4, p=0.2),
-        transforms.RandomGrayscale(p=0.2),
+        # Simple geometric augmentations
+        transforms.RandomRotation(10),  # Reduced from 15
         
         # Convert to tensor and normalize
         transforms.ToTensor(),
         normalize,
         
-        # Random erasing
-        transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 3.3))
+        # Random erasing with moderate settings
+        transforms.RandomErasing(p=0.2)  # Reduced from 0.5
     ])
 
     val_tf = transforms.Compose([
