@@ -12,7 +12,6 @@ class ModelConfig(BaseModel):
     heads:        int = 12
     num_classes:  int = 1000
     dropout:      float = 0.1
-    model_name:   str = "pretrained_vit"
 
 class TrainConfig(BaseModel):
     epochs:     int = 100
@@ -34,6 +33,7 @@ class Config(BaseModel):
     }
     
     model: ModelConfig
+    model_name:   str = "pretrained_vit"
     train: TrainConfig
     finetune_cfg: Optional[FinetuneConfig] = None
     device: str = "cpu"
@@ -83,7 +83,6 @@ class Config(BaseModel):
                 heads=args.heads,
                 num_classes=args.num_classes,
                 dropout=args.dropout,
-                model_name=args.model_name
             ),
             train=TrainConfig(
                 epochs=args.epochs,
@@ -103,7 +102,8 @@ class Config(BaseModel):
             data_dir=args.data_dir,
             mode=args.mode,
             criterion=criterion,
-            output_dir=args.output_dir
+            output_dir=args.output_dir,
+            model_name=args.model_name
         )
 
 

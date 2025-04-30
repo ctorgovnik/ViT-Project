@@ -66,10 +66,9 @@ class EncoderLayer(nn.Module):
     
 
 class ViT(nn.Module):
-    def __init__(self, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, dropout=0., model_name="pretrained_vit"):
+    def __init__(self, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, dropout=0.):
         super().__init__()
         assert image_size % patch_size == 0, "Image dimensions must be divisible by the patch size."
-        self.model_name = model_name
         self.image_size = image_size
         self.patch_size = patch_size
         self.num_classes = num_classes
