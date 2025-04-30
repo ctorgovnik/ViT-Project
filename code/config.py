@@ -74,6 +74,7 @@ class Config(BaseModel):
         parser.add_argument('-nc', "--num_classes", type=int, default=10)
         parser.add_argument('-mn', "--model_name", type=str, default="pretrained_vit")
         parser.add_argument('-ckpt', "--checkpoint", type=str, default="checkpoints/pretrained_vit.pth")
+        parser.add_argument('--scheduler', type=str, default="CosineAnnealingLR")
 
         args = parser.parse_args(args)
         
