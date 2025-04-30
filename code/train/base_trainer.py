@@ -75,7 +75,7 @@ class BaseTrainer:
         return val_loss, val_acc
                 
     def _save_checkpoint(self, epoch, train_loss, train_acc, val_loss, val_acc):
-        os.makedirs(f"checkpoints/{self.config.model_name}", exist_ok=True)
+        os.makedirs(f"checkpoints", exist_ok=True)
         checkpoint = {
             'epoch': epoch,
             'model_state_dict': self.model.state_dict(),

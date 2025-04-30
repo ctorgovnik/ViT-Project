@@ -72,6 +72,7 @@ class ViT(nn.Module):
         self.image_size = image_size
         self.patch_size = patch_size
         self.num_classes = num_classes
+        self.dim = dim
 
         # Calculate dimensions
         self.num_patches = (image_size // patch_size) ** 2

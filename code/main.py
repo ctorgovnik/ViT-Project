@@ -8,13 +8,13 @@ from code.config import Config
 """
 sample command:
 Pretrain on Imagenet100:
-python -m code.main -m pretrain -b 128 -e 100 -i 224 -nc 100 -dir data/imagenet-100
+python -m code.main -m pretrain -b 128 -e 100 -i 224 -nc 100 -dir data/imagenet-100 --model_name pretrained_vit
 
 Pretrain on ImageNet-1000:
 python -m code.main -m pretrain -b 128 -e 100 -i 224 -nc 1000 -dir data/ImageNet-2012
 
 Finetune on CIFAR10:
-python -m code.main -m finetune -b 128 -e 100 -i 32 -nc 10 -dir data/cifar10
+python -m code.main -m finetune -b 128 -e 100 -i 32 -nc 10 -dir data/cifar10 -ckpt checkpoints/pretrained_vit.pth --model_name finetune_vit
 """
 
 def main(args):
