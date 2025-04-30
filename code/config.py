@@ -2,6 +2,7 @@ import argparse
 import torch
 from pydantic import BaseModel
 from typing import Optional
+import torch.nn as nn
 
 class ModelConfig(BaseModel):
     patch_size:   int = 16
@@ -37,7 +38,7 @@ class Config(BaseModel):
     train: TrainConfig
     finetune_cfg: Optional[FinetuneConfig] = None
     device: str = "cpu"
-    checkpoint: str = "./results/checkpoint.pth"
+    # checkpoint: str = "./results/checkpoint.pth"
     data_dir: str = "./data"
     mode: str = "pretrain"
     optimizer: OptimConfig
@@ -66,7 +67,7 @@ class Config(BaseModel):
         parser.add_argument('-i', '--image_size', type=int, default=32)
         parser.add_argument('-nc', "--num_classes", type=int, default=10)
         parser.add_argument('-mn', "--model_name", type=str, default="pretrained_vit")
-        parser.add_argument('-ckpt', "--checkpoint", type=str, default="./results/pretrained_vit.pth")
+        parser.add_argument('-ckpt', "--checkpoint", type=str, default="checkpoints/pretrained_vit.pth")
 
         args = parser.parse_args(args)
         
@@ -94,11 +95,11 @@ class Config(BaseModel):
                 lr=args.lr,
                 weight_decay=args.weight_decay
             ),
-            finetune=FinetuneConfig(
+            finetune_cfg=FinetuneConfig(
                 checkpoint=args.checkpoint
             ),
             device="cpu",
-            checkpoint=f"{args.output_dir}/checkpoint.pth",
+            # checkpoint=f"{args.output_dir}/checkpoint.pth",
             data_dir=args.data_dir,
             mode=args.mode,
             criterion=criterion,
@@ -106,5 +107,29 @@ class Config(BaseModel):
             model_name=args.model_name
         )
 
+    @classmethod
+    def from_config(cls, config):
+        # load pretrained weights
+        checkpoint = torch.load(config.finetune_cfg.checkpoint)
+        print("Loaded checkpoint with config:", checkpoint["model_config"])  # Debug print
+        
+        model = ViT(**checkpoint["model_config"])
+        print("Model dim:", model.dim)  # Debug print
+        
+        model.load_state_dict(checkpoint["model_state_dict"])
+        model.reset_classification_head(num_classes=config.model.num_classes)
+
+
+class ViT(nn.Module):
+    def __init__(self, image_size, patch_size, dim, depth, heads, mlp_dim, num_classes, dropout=0.1):
+        super().__init__()
+        self.dim = dim  # Store dim as instance variable
+        # ... rest of initialization ...
+
+    def reset_classification_head(self, num_classes):
+        self.mlp_head = nn.Sequential(
+            nn.LayerNorm(self.dim),  # Now we can access self.dim
+            nn.Linear(self.dim, num_classes)
+        )
 
     
