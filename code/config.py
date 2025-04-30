@@ -35,7 +35,7 @@ class Config(BaseModel):
     
     model: ModelConfig
     train: TrainConfig
-    finetune_cfg: FinetuneConfig
+    finetune_cfg: Optional[FinetuneConfig] = None
     device: str = "cpu"
     checkpoint: str = "./results/checkpoint.pth"
     data_dir: str = "./data"
