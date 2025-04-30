@@ -4,10 +4,11 @@ from tqdm import tqdm
 
 class BaseTrainer:
 
-    def __init__(self, model, optimizer, criterion, device, output_dir, train_loader, val_loader, num_epochs, config):
+    def __init__(self, model, optimizer, criterion, scheduler, device, output_dir, train_loader, val_loader, num_epochs, config):
         self.model = model
         self.optimizer = optimizer
         self.criterion = criterion
+        self.scheduler = scheduler
         self.device = device
         self.output_dir = output_dir
         self.train_loader = train_loader
@@ -50,6 +51,9 @@ class BaseTrainer:
             correct += predicted.eq(targets).sum().item()
             pbar.set_postfix({'loss': train_loss, 'acc': 100. * correct / total})
 
+        if self.scheduler is not None:
+            self.scheduler.step()
+            
         train_loss = train_loss / len(self.train_loader)
         train_acc = 100. * correct / total
         return train_loss, train_acc

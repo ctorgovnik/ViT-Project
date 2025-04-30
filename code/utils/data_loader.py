@@ -2,12 +2,13 @@ import os
 import numpy as np
 import pickle
 from torch.utils.data import DataLoader
-from .dataset import ImageDataset
+from .dataset import ImageDataset, HFDatasetWrapper, simple_collate
 from torchvision.datasets import ImageNet
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 from torchvision.datasets import CIFAR100
 from torchvision import transforms
+from datasets import load_dataset
 
 def get_imagenet1000_dataloaders(config, imagenet_path = "data/ImageNet-2012", shuffle=True):
     
@@ -39,13 +40,16 @@ def get_imagenet1000_dataloaders(config, imagenet_path = "data/ImageNet-2012", s
         shuffle=True,
         num_workers=8,
         pin_memory=True,
+        collate_fn=simple_collate,      # << override default here
     )
+
     val_loader = DataLoader(
         val_ds,
         batch_size=config.train.batch_size,
         shuffle=False,
         num_workers=8,
         pin_memory=True,
+        collate_fn=simple_collate,
     )
 
     return train_loader, val_loader
@@ -72,6 +76,11 @@ def get_imagenet100_dataloaders(config, imagenet_path = "data/imagenet100", shuf
 
     train_ds = ImageFolder(root=os.path.join(imagenet_path, "train"), transform=train_tf)
     val_ds   = ImageFolder(root=os.path.join(imagenet_path, "val"),   transform=val_tf)
+
+    # ds = load_dataset("clane9/imagenet-100")
+    # train_ds = HFDatasetWrapper(ds["train"], image_size=160)
+    # val_ds = HFDatasetWrapper(ds["validation"], image_size=160)
+  
 
     train_loader = DataLoader(
         train_ds,

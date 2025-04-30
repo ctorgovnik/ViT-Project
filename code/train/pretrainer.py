@@ -18,6 +18,12 @@ class PreTrainer(BaseTrainer):
             lr=config.optimizer.lr,
             weight_decay=config.optimizer.weight_decay
         )
+        scheduler_class = getattr(torch.optim.lr_scheduler, config.scheduler.name)
+        scheduler = scheduler_class(
+            optimizer,
+            T_max=config.scheduler.T_max,
+            eta_min=config.scheduler.eta_min
+        )
 
         criterion = config.criterion
         device = config.device
@@ -33,4 +39,4 @@ class PreTrainer(BaseTrainer):
         else:
             raise ValueError(f"Invalid dataset: {config.data_dir}")
 
-        return cls(model, optimizer, criterion, device, output_dir, train_loader, val_loader, config.train.epochs, config)
+        return cls(model, optimizer, criterion, scheduler, device, output_dir, train_loader, val_loader, config.train.epochs, config)

@@ -27,6 +27,11 @@ class OptimConfig(BaseModel):
 class FinetuneConfig(BaseModel):
     checkpoint: Optional[str] = None
 
+class SchedulerConfig(BaseModel):
+    name: str = "CosineAnnealingLR"
+    T_max: int = 200  # Your total epochs
+    eta_min: float = 1e-6
+
 
 class Config(BaseModel):
     model_config = {
@@ -36,6 +41,7 @@ class Config(BaseModel):
     model: ModelConfig
     model_name:   str = "pretrained_vit"
     train: TrainConfig
+    scheduler: SchedulerConfig
     finetune_cfg: Optional[FinetuneConfig] = None
     device: str = "cpu"
     # checkpoint: str = "./results/checkpoint.pth"
@@ -84,6 +90,11 @@ class Config(BaseModel):
                 heads=args.heads,
                 num_classes=args.num_classes,
                 dropout=args.dropout,
+            ),
+            scheduler=SchedulerConfig(
+                name=args.scheduler,
+                T_max=args.epochs,
+                eta_min=args.lr * 0.01
             ),
             train=TrainConfig(
                 epochs=args.epochs,

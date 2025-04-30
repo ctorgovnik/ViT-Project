@@ -90,3 +90,27 @@ class ImageDataset(Dataset):
                    'dog', 'frog', 'horse', 'ship', 'truck']
         else:
             return list(self.class_to_idx.keys()) if hasattr(self, 'class_to_idx') else None
+
+
+class HFDatasetWrapper(Dataset):
+    def __init__(self, hf_dataset, image_size=160):
+        self.hf_dataset = hf_dataset
+        self.transform = transforms.Compose([
+            transforms.Resize((image_size, image_size)),
+            transforms.ToTensor(),
+        ])
+
+    def __len__(self):
+        return len(self.hf_dataset)
+
+    def __getitem__(self, idx):
+        item = self.hf_dataset[idx]
+        img = item['image']                   # PIL image
+        label = int(item['label'])
+        img = self.transform(img)
+        return img.contiguous().clone(), label
+
+def simple_collate(batch):
+    imgs, labels = zip(*batch)
+    # stack into shape (B, C, H, W) and (B,)
+    return torch.stack(imgs, 0), torch.tensor(labels, dtype=torch.long)
