@@ -9,9 +9,10 @@ class FineTuner(BaseTrainer):
         from code.utils.data_loader import get_cifar10_dataloaders, get_cifar100_dataloaders
 
         # load pretrained weights
-        model = ViT(**config.model.model_dump())
-        checkpoint = torch.load(config.checkpoint["model_state_dict"])
-        model.load_state_dict(checkpoint)
+        checkpoint = torch.load(config.finetune_cfg.checkpoint)
+        model = ViT(**checkpoint["model_config"]) # dump saved model config
+        model.load_state_dict(checkpoint["model_state_dict"])
+
 
         # replace head
         model.reset_classification_head(num_classes=config.model.num_classes)
@@ -34,4 +35,4 @@ class FineTuner(BaseTrainer):
         else:
             raise ValueError(f"Invalid dataset: {config.data_dir}")
 
-        return cls(model, optimizer, criterion, device, output_dir, train_loader, val_loader, config.train.epochs)
+        return cls(model, optimizer, criterion, device, output_dir, train_loader, val_loader, config.train.epochs, config)

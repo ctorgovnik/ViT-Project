@@ -1,4 +1,5 @@
 import torch
+
 def test(model, test_loader, criterion, device):
     model.eval()
     test_loss = 0

@@ -31,4 +31,4 @@ class PreTrainer(BaseTrainer):
         else:
             raise ValueError(f"Invalid dataset: {config.data_dir}")
 
-        return cls(model, optimizer, criterion, device, output_dir, train_loader, val_loader, config.train.epochs)
+        return cls(model, optimizer, criterion, device, output_dir, train_loader, val_loader, config.train.epochs, config)

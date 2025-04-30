@@ -1,6 +1,7 @@
 import argparse
 import torch
 from pydantic import BaseModel
+from typing import Optional
 
 class ModelConfig(BaseModel):
     patch_size:   int = 16
@@ -11,6 +12,7 @@ class ModelConfig(BaseModel):
     heads:        int = 12
     num_classes:  int = 1000
     dropout:      float = 0.1
+    model_name:   str = "pretrained_vit"
 
 class TrainConfig(BaseModel):
     epochs:     int = 100
@@ -22,6 +24,9 @@ class OptimConfig(BaseModel):
     lr: float = 1e-3
     weight_decay: float = 0.1
 
+class FinetuneConfig(BaseModel):
+    checkpoint: Optional[str] = None
+
 
 class Config(BaseModel):
     model_config = {
@@ -30,6 +35,7 @@ class Config(BaseModel):
     
     model: ModelConfig
     train: TrainConfig
+    finetune_cfg: FinetuneConfig
     device: str = "cpu"
     checkpoint: str = "./results/checkpoint.pth"
     data_dir: str = "./data"
@@ -59,6 +65,8 @@ class Config(BaseModel):
         parser.add_argument('--criterion', type=str, default="CrossEntropyLoss")
         parser.add_argument('-i', '--image_size', type=int, default=32)
         parser.add_argument('-nc', "--num_classes", type=int, default=10)
+        parser.add_argument('-mn', "--model_name", type=str, default="pretrained_vit")
+        parser.add_argument('-ckpt', "--checkpoint", type=str, default="./results/pretrained_vit.pth")
 
         args = parser.parse_args(args)
         
@@ -74,7 +82,8 @@ class Config(BaseModel):
                 mlp_dim=args.mlp_dim,
                 heads=args.heads,
                 num_classes=args.num_classes,
-                dropout=args.dropout
+                dropout=args.dropout,
+                model_name=args.model_name
             ),
             train=TrainConfig(
                 epochs=args.epochs,
@@ -85,6 +94,9 @@ class Config(BaseModel):
                 name=args.optimizer,
                 lr=args.lr,
                 weight_decay=args.weight_decay
+            ),
+            finetune=FinetuneConfig(
+                checkpoint=args.checkpoint
             ),
             device="cpu",
             checkpoint=f"{args.output_dir}/checkpoint.pth",
