@@ -7,7 +7,7 @@ class PreTrainer(BaseTrainer):
     @classmethod
     def from_config(cls, config):
         from code.model.vit import ViT
-        from code.utils.data_loader import get_imagenet100_dataloaders, get_imagenet1000_dataloaders, get_cifar10_dataloaders
+        from code.utils.data_loader import get_imagenet100_dataloaders, get_imagenet1000_dataloaders, get_cifar10_dataloaders, get_cifar100_dataloaders
         
         model = ViT(**config.model.model_dump())
 
@@ -28,6 +28,8 @@ class PreTrainer(BaseTrainer):
             train_loader, val_loader = get_imagenet1000_dataloaders(config, imagenet_path=config.data_dir, shuffle=config.train.shuffle)
         elif config.data_dir == "data/cifar10":
             train_loader, val_loader = get_cifar10_dataloaders(config, shuffle=config.train.shuffle)
+        elif config.data_dir == "data/cifar100":
+            train_loader, val_loader = get_cifar100_dataloaders(config, shuffle=config.train.shuffle)
         else:
             raise ValueError(f"Invalid dataset: {config.data_dir}")
 

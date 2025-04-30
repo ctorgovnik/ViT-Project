@@ -136,7 +136,7 @@ def get_cifar100_dataloaders(config, data_dir="data/cifar100", shuffle=True):
         transforms.ToTensor(),
         normalize,
     ])
-    
+    print("loading cifar100")
     train_ds = CIFAR100(
         root=data_dir,           # where to put / look for the files
         train=True,
