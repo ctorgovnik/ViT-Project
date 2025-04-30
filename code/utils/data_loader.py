@@ -9,38 +9,51 @@ from torchvision.datasets import ImageFolder
 from torchvision.datasets import CIFAR100
 from torchvision import transforms
 from datasets import load_dataset
+import torch
+import ssl
+
+# Disable SSL verification for CIFAR-100 download
+ssl._create_default_https_context = ssl._create_unverified_context
 
 def get_imagenet1000_dataloaders(config, imagenet_path = "data/ImageNet-2012", shuffle=True):
     
-    normalize = transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std =[0.229, 0.224, 0.225],
-    )
+    # normalize = transforms.Normalize(
+    #     mean=[0.485, 0.456, 0.406],
+    #     std =[0.229, 0.224, 0.225],
+    # )
 
-    train_tf = transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        normalize,
-    ])
+    # train_tf = transforms.Compose([
+    #     transforms.RandomResizedCrop(224),
+    #     transforms.RandomHorizontalFlip(),
+    #     transforms.ToTensor(),
+    #     normalize,
+    # ])
 
-    val_tf = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        normalize,
-    ])
+    # val_tf = transforms.Compose([
+    #     transforms.Resize(256),
+    #     transforms.CenterCrop(224),
+    #     transforms.ToTensor(),
+    #     normalize,
+    # ])
 
-    train_ds = ImageNet(root=imagenet_path, split="train", transform=train_tf)
-    val_ds   = ImageNet(root=imagenet_path, split="val",   transform=val_tf)
+    # train_ds = ImageNet(root=imagenet_path, split="train", transform=train_tf)
+    # val_ds   = ImageNet(root=imagenet_path, split="val",   transform=val_tf)
 
+    ds = load_dataset("ILSVRC/imagenet-1k")
+    train_ds = ds["train"]
+    val_ds = ds["validation"]
+
+    train_ds.with_format(type="torch", columns=["image", "label"])
+    val_ds.with_format(type="torch", columns=["image", "label"])
+    
+    print(train_ds[0])
     train_loader = DataLoader(
         train_ds,
         batch_size=config.train.batch_size,
         shuffle=True,
         num_workers=8,
         pin_memory=True,
-        collate_fn=simple_collate,      # << override default here
+        collate_fn=collate_and_transform,      # << override default here
     )
 
     val_loader = DataLoader(
@@ -49,38 +62,44 @@ def get_imagenet1000_dataloaders(config, imagenet_path = "data/ImageNet-2012", s
         shuffle=False,
         num_workers=8,
         pin_memory=True,
-        collate_fn=simple_collate,
+        collate_fn=collate_and_transform,
     )
 
     return train_loader, val_loader
 
 def get_imagenet100_dataloaders(config, imagenet_path = "data/imagenet100", shuffle=True):
-    normalize = transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std =[0.229, 0.224, 0.225],
-    )
+    # normalize = transforms.Normalize(
+    #     mean=[0.485, 0.456, 0.406],
+    #     std =[0.229, 0.224, 0.225],
+    # )
 
-    train_tf = transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        normalize,
-    ])
+    # train_tf = transforms.Compose([
+    #     transforms.RandomResizedCrop(224),
+    #     transforms.RandomHorizontalFlip(),
+    #     transforms.ToTensor(),
+    #     normalize,
+    # ])
 
-    val_tf = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        normalize,
-    ])
+    # val_tf = transforms.Compose([
+    #     transforms.Resize(256),
+    #     transforms.CenterCrop(224),
+    #     transforms.ToTensor(),
+    #     normalize,
+    # ])
 
-    train_ds = ImageFolder(root=os.path.join(imagenet_path, "train"), transform=train_tf)
-    val_ds   = ImageFolder(root=os.path.join(imagenet_path, "val"),   transform=val_tf)
+    # train_ds = ImageFolder(root=os.path.join(imagenet_path, "train"), transform=train_tf)
+    # val_ds   = ImageFolder(root=os.path.join(imagenet_path, "val"),   transform=val_tf)
 
-    # ds = load_dataset("clane9/imagenet-100")
+    ds = load_dataset("clane9/imagenet-100")
     # train_ds = HFDatasetWrapper(ds["train"], image_size=160)
     # val_ds = HFDatasetWrapper(ds["validation"], image_size=160)
-  
+    train_ds = ds["train"]
+    val_ds = ds["validation"]
+    
+    train_ds.with_format(type="torch", columns=["image", "label"])
+    val_ds.with_format(type="torch", columns=["image", "label"])
+
+    print(train_ds[0])
 
     train_loader = DataLoader(
         train_ds,
@@ -88,6 +107,7 @@ def get_imagenet100_dataloaders(config, imagenet_path = "data/imagenet100", shuf
         shuffle=True,
         num_workers=8,
         pin_memory=True,
+        collate_fn=collate_and_transform,
     )
     val_loader = DataLoader(
         val_ds,
@@ -95,6 +115,7 @@ def get_imagenet100_dataloaders(config, imagenet_path = "data/imagenet100", shuf
         shuffle=False,
         num_workers=8,
         pin_memory=True,
+        collate_fn=collate_and_transform,
     )
 
     return train_loader, val_loader
@@ -130,34 +151,58 @@ def get_cifar10_dataloaders(config, shuffle=True):
 
 def get_cifar100_dataloaders(config, data_dir="data/cifar100", shuffle=True):
     normalize = transforms.Normalize(
-        mean=[0.507, 0.486, 0.401],
-        std=[0.267, 0.256, 0.276],
+        mean=[0.5071, 0.4867, 0.4408],
+        std=[0.2675, 0.2565, 0.2761],
     )
 
     train_tf = transforms.Compose([
-        transforms.RandomHorizontalFlip(),
+        # Basic augmentations
         transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomVerticalFlip(p=0.2),
+        
+        # Color augmentations
+        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+        transforms.RandomAutocontrast(p=0.5),
+        transforms.RandomEqualize(p=0.5),
+        transforms.RandomAdjustSharpness(sharpness_factor=2, p=0.5),
+        
+        # Geometric augmentations
+        transforms.RandomRotation(15),
+        transforms.RandomAffine(0, translate=(0.1, 0.1)),
+        transforms.RandomPerspective(distortion_scale=0.2),
+        
+        # Advanced augmentations
+        transforms.RandomSolarize(threshold=192.0, p=0.2),
+        transforms.RandomPosterize(bits=4, p=0.2),
+        transforms.RandomGrayscale(p=0.2),
+        
+        # Convert to tensor and normalize
         transforms.ToTensor(),
         normalize,
+        
+        # Random erasing
+        transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 3.3))
     ])
 
     val_tf = transforms.Compose([
         transforms.ToTensor(),
         normalize,
     ])
+
     print("loading cifar100")
     train_ds = CIFAR100(
-        root=data_dir,           # where to put / look for the files
+        root=data_dir,
         train=True,
-        download=True,           # <— tell it to fetch if missing
-        transform=transforms.ToTensor()
+        download=True,
+        transform=train_tf
     )
 
     val_ds = CIFAR100(
         root=data_dir,
         train=False,
         download=True,
-        transform=transforms.ToTensor()
+        transform=val_tf
     )
 
     train_loader = DataLoader(
@@ -245,4 +290,17 @@ def gather_image_paths(data_dir, mode):
                     image_paths['test'].append(os.path.join(root, file))
 
     return image_paths
+
+def collate_and_transform(batch):
+    def ensure_rgb(img):
+        return img.convert("RGB")
+    transform = transforms.Compose([
+        ensure_rgb,  # Convert to RGB if not already
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        # Add normalization if needed
+    ])
+    images = [transform(item['image']) for item in batch]
+    labels = [item['label'] for item in batch]
+    return torch.stack(images), torch.tensor(labels)
 
