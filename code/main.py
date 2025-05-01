@@ -4,6 +4,7 @@ import torch
 from code.train.finetuner import FineTuner
 from code.train.pretrainer import PreTrainer
 from code.config import Config
+from code.train.resnet import ResNetTrainer
 
 """
 sample command:
@@ -28,6 +29,8 @@ def main(args):
     
     if config.mode == "finetune":
         trainer = FineTuner.from_config(config)
+    elif config.mode == "resnet":
+        trainer = ResNetTrainer.from_config(config)
     else:
         trainer = PreTrainer.from_config(config)
     
