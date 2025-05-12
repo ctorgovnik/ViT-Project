@@ -26,7 +26,9 @@ to mix models designed by ourselves with larger models pulled from resources on 
 ### Finetuning Pretrained Models From PyTorch
 In [code\notebooks](code/notebooks) you will find the training loops for the models pulled from PyTorch. 
 
-The file [ViTFinetuning.ipynb](code/notebooks/ViTFinetuning.ipynb) contains code to finetune the Base ViT and the Mini ViT as described in our report. Simply run the notebook from the top to finetune the models on CIFAR10 (done in Google Colab for compute and space to store datasets). To choose whether finetuning the Mini ViT or the Base ViT, simply change the flag ```UsingVIT_b``` between ```True``` and ```False```.
+The file [ViTFinetuning.ipynb](code/notebooks/ViTFinetuning.ipynb) contains code to finetune the Base ViT and the Mini ViT as described in our report. Simply run the notebook from the top to finetune the models on CIFAR10 (done in Google Colab for compute and space to store datasets). To choose whether finetuning the Mini ViT or the Base ViT, simply change the flag ```UsingVIT_b``` between ```True``` and ```False```. <br>
+The file [ViTFinetuning.ipynb](code/notebooks/ResNetFinetuning.ipynb) contains code to finetune the ResNet-1k and ResNet-CIFAR100 models. <br>
+The file [ViTFinetuning.ipynb](code/notebooks/ResNet18_CIFAR100_pretraining.ipynb) contains code to pretrain ResNet-18 on CIFAR100.
 
 ## Results/Insights
 Our experiments reproduced the core finding of Dosovitskiy et al., showing that ViTs require large-scale pre-
