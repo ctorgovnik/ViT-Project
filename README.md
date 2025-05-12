@@ -22,10 +22,16 @@ to mix models designed by ourselves with larger models pulled from resources on 
 ## Reproduction Steps
 
 ## Results/Insights
+Our experiments reproduced the core finding of Dosovitskiy et al., showing that ViTs require large-scale pre-
+training to outperform convolutional models like ResNet. On smaller datasets such as CIFAR-100, ResNet-18
+showed stronger performance, but ViTs significantly outperformed when pretrained on ImageNet-1K. These
+results highlight the scalability of ViTs and their potential when ample data and compute are available.
 
 ## Conclusion
-
-## References
+In future work, we aim to investigate methods that reduce ViTs’ data and compute requirements, such
+as knowledge distillation, data augmentation, or semi-supervised learning. We could also explore hybrid ar-
+chitectures that combine convolutional and attention-based components to improve performance on smaller
+datasets
 
 ## Acknowledgements
 [1] Ashish Vaswani et al. “Attention is All You Need”. In: Advances in Neural Information Processing Systems.
