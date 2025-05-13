@@ -64,12 +64,39 @@ pip install -r requirements.txt
 
 3. Run training:
 ```bash
-# For ResNet on CIFAR-100
-python -m code.main -m resnet -b 128 -e 100 -i 32 -nc 100 -dir data/cifar100 --model_name resnet_cifar100
+# Pretraining ViT on CIFAR-100
+python -m code.main -m pretrain -b 128 -e 100 -i 32 -nc 100 -dir data/cifar100 --model_name pretrained_vit
 
-# For ViT on CIFAR-100
-python -m code.main -m vit -b 128 -e 100 -i 32 -nc 100 -dir data/cifar100 --model_name vit_cifar100
+# Pretraining ViT on ImageNet-100
+python -m code.main -m pretrain -b 256 -e 200 -i 224 -nc 100 -dir data/imagenet-100 --model_name pretrained_vit
+
+# Finetuning ViT on CIFAR-10
+python -m code.main -m finetune -b 128 -e 100 -i 32 -nc 10 --mlp_dim 1024 -dir data/cifar10 -ckpt checkpoints/pretrained_vit.pth --model_name finetune_vit
+
+# Pretraining ResNet on CIFAR-100
+python -m code.main -m resnet -b 128 -e 200 -i 32 -nc 100 -dir data/cifar100 --model_name pretrained_resnet
 ```
+
+### Command Line Options
+| Option | Description | Default | Example |
+|--------|-------------|---------|---------|
+| `-m, --mode` | Training mode (pretrain/finetune/resnet) | pretrain | `-m pretrain` |
+| `-b, --batch_size` | Batch size for training | 32 | `-b 128` |
+| `-e, --epochs` | Number of training epochs | 100 | `-e 200` |
+| `-i, --image_size` | Input image size | 32 | `-i 224` |
+| `-nc, --num_classes` | Number of output classes | 10 | `-nc 100` |
+| `-dir, --data_dir` | Dataset directory | data | `-dir data/cifar100` |
+| `-ps, --patch_size` | ViT patch size | 16 | `-ps 16` |
+| `-dim, --dim` | ViT embedding dimension | 128 | `-dim 768` |
+| `-hd, --heads` | Number of attention heads | 4 | `-hd 12` |
+| `-d, --depth` | Number of transformer layers | 12 | `-d 12` |
+| `-md, --mlp_dim` | MLP dimension in transformer | 512 | `-md 3072` |
+| `-do, --dropout` | Dropout rate | 0.1 | `-do 0.1` |
+| `--optimizer` | Optimizer name | AdamW | `--optimizer AdamW` |
+| `--lr` | Learning rate | 1e-3 | `--lr 1e-4` |
+| `--weight_decay` | Weight decay | 0.1 | `--weight_decay 0.01` |
+| `-ckpt, --checkpoint` | Checkpoint path for finetuning | checkpoints/pretrained_vit.pth | `-ckpt path/to/checkpoint.pth` |
+| `-mn, --model_name` | Name for saving model | pretrained_vit | `--model_name my_model` |
 
 **Requirements**:
 - Python 3.8+
