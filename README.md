@@ -33,6 +33,10 @@ We focus on reproducing the image classification performance of ViT on CIFAR-10 
 ```
 
 ## Re-implementation Details
+As pointed out in the paper, training ViTs is very resource intensive. They are much more compute heavy then
+convolutional models, which is one of their drawbacks. For us, as undergraduate students without access to
+large compute, this meant we would have to find another way to test the scaling of these models. We decided
+to mix models designed by ourselves with larger models pulled from resources on the internet.
 - **Models**: 
   - Custom ViT (~1M parameters) pretrained on CIFAR-100
   - Mini ViT (deit-tiny-patch16-224, ~5M parameters) pretrained on ImageNet-1K
@@ -49,6 +53,13 @@ We focus on reproducing the image classification performance of ViT on CIFAR-10 
   - Comprehensive data augmentation pipeline
   - Flexible configuration system
   - Mixed approach using both custom and pretrained models
+  - 
+### Finetuning Pretrained Models From PyTorch
+In [code\notebooks](code/notebooks) you will find the training loops for the models pulled from PyTorch. 
+
+The file [ViTFinetuning.ipynb](code/notebooks/ViTFinetuning.ipynb) contains code to finetune the Base ViT and the Mini ViT as described in our report. Simply run the notebook from the top to finetune the models on CIFAR10 (done in Google Colab for compute and space to store datasets). To choose whether finetuning the Mini ViT or the Base ViT, simply change the flag ```UsingVIT_b``` between ```True``` and ```False```. <br>
+The file [ViTFinetuning.ipynb](code/notebooks/ResNetFinetuning.ipynb) contains code to finetune the ResNet-1k and ResNet-CIFAR100 models. <br>
+The file [ViTFinetuning.ipynb](code/notebooks/ResNet18_CIFAR100_pretraining.ipynb) contains code to pretrain ResNet-18 on CIFAR100.
 
 ## Reproduction Steps
 1. Clone the repository:
@@ -105,7 +116,10 @@ python -m code.main -m resnet -b 128 -e 200 -i 32 -nc 100 -dir data/cifar100 --m
 - 30GB+ disk space for datasets
 
 ## Results/Insights
-Our implementation results demonstrate the scaling behavior of ViT models with different pretraining datasets:
+Our experiments reproduced the core finding of Dosovitskiy et al., showing that ViTs require large-scale pre-
+training to outperform convolutional models like ResNet. On smaller datasets such as CIFAR-100, ResNet-18
+showed stronger performance, but ViTs significantly outperformed when pretrained on ImageNet-1K. These
+results highlight the scalability of ViTs and their potential when ample data and compute are available.
 
 | Model | # Parameters | Pretraining Dataset | CIFAR-10 Accuracy |
 |-------|-------------|---------------------|-------------------|
@@ -119,6 +133,11 @@ The results show that while ResNet outperforms ViT on smaller datasets (CIFAR-10
 
 ## Conclusion
 This implementation successfully demonstrates the feasibility of using transformer architectures for image classification tasks. The comparison between ViT and ResNet provides valuable insights into the trade-offs between these architectures, particularly in the context of smaller datasets.
+
+In future work, we aim to investigate methods that reduce ViTs’ data and compute requirements, such
+as knowledge distillation, data augmentation, or semi-supervised learning. We could also explore hybrid ar-
+chitectures that combine convolutional and attention-based components to improve performance on smaller
+datasets
 
 ## References
 1. Ashish Vaswani et al. "Attention is All You Need". In: Advances in Neural Information Processing Systems. Vol. 30. Curran Associates, Inc., 2017.
