@@ -53,8 +53,8 @@ We focus on reproducing the image classification performance of ViT on CIFAR-10 
 ## Reproduction Steps
 1. Clone the repository:
 ```bash
-git clone [repository-url]
-cd [repository-name]
+git clone https://github.com/ctorgovnik/ViT-Project.git
+cd ViT-Project
 ```
 
 2. Install dependencies:
