@@ -1,53 +1,107 @@
-# ViT-Project
+# Vision Transformer and ResNet Implementation
 
 ## Introduction
-Can the Transformer be applied effectively to images for large-scale recognition tasks? This question was addressed
-by Dosovitskiy et al. from Google Research’s Brain Team in their 2020 paper, ”An Image is Worth 16×16
-Words.”[2] The resulting Vision Transformer. (ViT) model achieved state-of-the-art results on several image classification benchmarks, demonstrating that attention based models could surpass convolutional architectures at scale.
+This repository implements Vision Transformer (ViT) and ResNet models for image classification, focusing on their performance through pretraining and finetuning. We explore how these architectures scale with different dataset sizes, using both custom ViT models and pretrained variants. The project reproduces the findings from "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale" by Dosovitskiy et al., while also comparing its performance with ResNet architectures.
 
 ## Chosen Result
-We chose to reproduce the scaling results presented by Dosovitskiy et al. in their Vision Transformer (ViT)
-paper[2]. Specifically, our goal was to replicate the findings that demonstrate how convolutional neural networks
-(CNNs), particularly ResNets, outperform ViTs when trained on smaller datasets due to the strong inductive
-biases inherent in convolutional architectures.
+We focus on reproducing the image classification performance of ViT on CIFAR-10 dataset, pretrained on CIFAR-100 dataset, comparing it with ResNet18 as a baseline. While the original paper used large-scale datasets like ImageNet-21k for pretraining, we demonstrate the model's behavior on smaller datasets, showing how ViT's performance scales with data size.
 
 ## GitHub Contents
+```
+.
+├── code/
+│   ├── main.py           # Main training script
+│   ├── config.py         # Configuration settings
+│   ├── test.py          # Testing utilities
+│   ├── model/
+│   │   └── vit.py       # Vision Transformer implementation
+│   ├── train/
+│   │   ├── base_trainer.py    # Base training class
+│   │   ├── resnet.py          # ResNet training implementation
+│   │   ├── finetuner.py       # Finetuning functionality
+│   │   └── pretrainer.py      # Pretraining functionality
+│   └── utils/
+│       ├── data_loader.py     # Data loading utilities
+│       ├── dataset.py         # Dataset implementations
+│       ├── augmentations.py   # Data augmentation pipeline
+│       └── loss.py           # Loss function implementations
+├── data/                 # Dataset storage
+├── checkpoints/          # Saved model checkpoints
+├── results/             # Training results and metrics
+├── report/              # Project documentation
+└── poster/              # Project presentation materials
+```
 
 ## Re-implementation Details
-As pointed out in the paper, training ViTs is very resource intensive. They are much more compute heavy then
-convolutional models, which is one of their drawbacks. For us, as undergraduate students without access to
-large compute, this meant we would have to find another way to test the scaling of these models. We decided
-to mix models designed by ourselves with larger models pulled from resources on the internet.
+- **Models**: 
+  - Custom ViT (~1M parameters) pretrained on CIFAR-100
+  - Mini ViT (deit-tiny-patch16-224, ~5M parameters) pretrained on ImageNet-1K
+  - Base ViT (~86.5M parameters) pretrained on ImageNet-1K
+  - ResNet18 (~11.6M parameters) pretrained on both CIFAR-100 and ImageNet-1K
+- **Datasets**: 
+  - CIFAR-10 for finetuning and evaluation
+  - CIFAR-100 for small-scale pretraining
+  - ImageNet-1K for large-scale pretraining (using pretrained models)
+- **Tools**: PyTorch, torchvision, HuggingFace
+- **Evaluation**: Classification accuracy on CIFAR-10 after finetuning
+- **Modifications**: 
+  - Scaled down architecture for smaller datasets
+  - Comprehensive data augmentation pipeline
+  - Flexible configuration system
+  - Mixed approach using both custom and pretrained models
 
 ## Reproduction Steps
+1. Clone the repository:
+```bash
+git clone [repository-url]
+cd [repository-name]
+```
 
-### Using In House ViT
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-### Finetuning Pretrained Models From PyTorch
-In [code\notebooks](code/notebooks) you will find the training loops for the models pulled from PyTorch. 
+3. Run training:
+```bash
+# For ResNet on CIFAR-100
+python -m code.main -m resnet -b 128 -e 100 -i 32 -nc 100 -dir data/cifar100 --model_name resnet_cifar100
 
-The file [ViTFinetuning.ipynb](code/notebooks/ViTFinetuning.ipynb) contains code to finetune the Base ViT and the Mini ViT as described in our report. Simply run the notebook from the top to finetune the models on CIFAR10 (done in Google Colab for compute and space to store datasets). To choose whether finetuning the Mini ViT or the Base ViT, simply change the flag ```UsingVIT_b``` between ```True``` and ```False```. <br>
-The file [ViTFinetuning.ipynb](code/notebooks/ResNetFinetuning.ipynb) contains code to finetune the ResNet-1k and ResNet-CIFAR100 models. <br>
-The file [ViTFinetuning.ipynb](code/notebooks/ResNet18_CIFAR100_pretraining.ipynb) contains code to pretrain ResNet-18 on CIFAR100.
+# For ViT on CIFAR-100
+python -m code.main -m vit -b 128 -e 100 -i 32 -nc 100 -dir data/cifar100 --model_name vit_cifar100
+```
+
+**Requirements**:
+- Python 3.8+
+- CUDA-capable GPU (recommended)
+- 16GB+ RAM
+- 30GB+ disk space for datasets
 
 ## Results/Insights
-Our experiments reproduced the core finding of Dosovitskiy et al., showing that ViTs require large-scale pre-
-training to outperform convolutional models like ResNet. On smaller datasets such as CIFAR-100, ResNet-18
-showed stronger performance, but ViTs significantly outperformed when pretrained on ImageNet-1K. These
-results highlight the scalability of ViTs and their potential when ample data and compute are available.
+Our implementation results demonstrate the scaling behavior of ViT models with different pretraining datasets:
+
+| Model | # Parameters | Pretraining Dataset | CIFAR-10 Accuracy |
+|-------|-------------|---------------------|-------------------|
+| ViT (OC) | 1M | CIFAR-100 | 65.00% |
+| ResNet-18 | 11.6M | CIFAR-100 | 72.36% |
+| Mini ViT | 5M | ImageNet-1K | 87.33% |
+| Base ViT | 86.5M | ImageNet-1K | 94.64% |
+| ResNet-18 | 11.6M | ImageNet-1K | 79.73% |
+
+The results show that while ResNet outperforms ViT on smaller datasets (CIFAR-100), ViT models significantly improve with larger pretraining datasets (ImageNet-1K). Notably, the Base ViT achieves the highest accuracy despite having more parameters, while the Mini ViT outperforms ResNet-18 even with fewer parameters when both are pretrained on ImageNet-1K.
 
 ## Conclusion
-In future work, we aim to investigate methods that reduce ViTs’ data and compute requirements, such
-as knowledge distillation, data augmentation, or semi-supervised learning. We could also explore hybrid ar-
-chitectures that combine convolutional and attention-based components to improve performance on smaller
-datasets
+This implementation successfully demonstrates the feasibility of using transformer architectures for image classification tasks. The comparison between ViT and ResNet provides valuable insights into the trade-offs between these architectures, particularly in the context of smaller datasets.
+
+## References
+1. Ashish Vaswani et al. "Attention is All You Need". In: Advances in Neural Information Processing Systems. Vol. 30. Curran Associates, Inc., 2017.
+2. Alexey Dosovitskiy et al. "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale". In: International Conference on Learning Representations (ICLR). arXiv:2010.11929. 2021.
+3. Alex Krizhevsky. Learning multiple layers of features from tiny images. Tech. rep. University of Toronto, 2009. url: https://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf.
+4. Facebook AI. deit-tiny-patch16-224 on HuggingFace. https://huggingface.co/facebook/deit-tiny-patch16-224. 2024.
+5. PyTorch Team. Torchvision Models. https://pytorch.org/vision/main/models.html. 2024.
 
 ## Acknowledgements
-[1] Ashish Vaswani et al. “Attention is All You Need”. In: Advances in Neural Information Processing Systems.
-Vol. 30. Curran Associates, Inc., 2017. <br><br>
-[2] Alexey Dosovitskiy et al. “An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale”.
-In: International Conference on Learning Representations (ICLR). arXiv:2010.11929. 2021.<br><br>
-[3] Alex Krizhevsky. Learning multiple layers of features from tiny images. Tech. rep. University of Toronto,
-2009. url: https://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf.<br><br>
-[4] Facebook AI. deit-tiny-patch16-224 on HuggingFace. https://huggingface.co/facebook/deit-tiny-patch16-224. 2024.<br><br>
-[5] PyTorch Team. Torchvision Models. https://pytorch.org/vision/main/models.html. 2024
+This project was developed as part of the Deep Learning course at Cornell University. Special thanks to the course instructors and teaching assistants for their guidance and support.
+
+
+
